@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبر معلوماتك - مكافحة التحرش الإلكتروني</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/quiz.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="logo">📝 اختبر معلوماتك</h1>
+            <p class="tagline">قيّم مستوى معرفتك بالتحرش الإلكتروني وطرق الحماية</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- معلومات الاختبار -->
+            <section class="quiz-info">
+                <div class="info-box">
+                    <h2>📋 معلومات الاختبار</h2>
+                    <div class="info-details">
+                        <div class="info-item">
+                            <span class="info-label">عدد الأسئلة:</span>
+                            <span class="info-value" id="totalQuestions">15</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">نوع الأسئلة:</span>
+                            <span class="info-value">نعم / لا</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الوقت المتوقع:</span>
+                            <span class="info-value">5-10 دقائق</span>
+                        </div>
+                    </div>
+                    <p class="info-note">سيتم عرض النتائج مع الإجابات الصحيحة والخاطئة بعد انتهاء الاختبار</p>
+                </div>
+            </section>
+
+            <!-- منطقة الاختبار -->
+            <section class="quiz-section" id="quizSection">
+                <div class="quiz-container">
+                    <div class="quiz-header">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="quiz-counter">
+                            <span id="currentQuestion">1</span> من <span id="totalQuestionsDisplay">15</span>
+                        </div>
+                    </div>
+
+                    <div class="question-container" id="questionContainer">
+                        <!-- الأسئلة ستُضاف هنا بواسطة JavaScript -->
+                    </div>
+
+                    <div class="quiz-navigation">
+                        <button id="prevBtn" class="nav-btn prev-btn" disabled>السؤال السابق</button>
+                        <button id="nextBtn" class="nav-btn next-btn" disabled>السؤال التالي</button>
+                        <button id="submitBtn" class="nav-btn submit-btn" style="display: none;">إنهاء الاختبار</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- نتائج الاختبار -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h2>🎉 نتائج الاختبار</h2>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <span class="score-percentage" id="scorePercentage">0%</span>
+                                <span class="score-text">النتيجة</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="score-breakdown">
+                        <div class="score-item correct">
+                            <span class="score-icon">✅</span>
+                            <span class="score-label">إجابات صحيحة:</span>
+                            <span class="score-value" id="correctAnswers">0</span>
+                        </div>
+                        <div class="score-item incorrect">
+                            <span class="score-icon">❌</span>
+                            <span class="score-label">إجابات خاطئة:</span>
+                            <span class="score-value" id="incorrectAnswers">0</span>
+                        </div>
+                        <div class="score-item total">
+                            <span class="score-icon">📊</span>
+                            <span class="score-label">المجموع:</span>
+                            <span class="score-value" id="totalAnswered">0</span>
+                        </div>
+                    </div>
+
+                    <div class="performance-message" id="performanceMessage">
+                        <!-- رسالة الأداء ستُضاف هنا -->
+                    </div>
+
+                    <div class="detailed-results" id="detailedResults">
+                        <h3>مراجعة الإجابات</h3>
+                        <div class="results-list" id="resultsList">
+                            <!-- تفاصيل الإجابات ستُضاف هنا -->
+                        </div>
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="action-btn retry-btn" onclick="restartQuiz()">إعادة الاختبار</button>
+                        <button class="action-btn share-btn" onclick="shareResults()">مشاركة النتيجة</button>
+                        <button class="action-btn learn-btn" onclick="window.location.href='education.html'">تعلم المزيد</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- زر العودة -->
+            <section class="back-section">
+                <button class="back-btn" onclick="window.location.href='index.html'">
+                    ← العودة للصفحة الرئيسية
+                </button>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 مكافحة التحرش الإلكتروني. جميع الحقوق محفوظة.</p>
+            <p class="footer-note">التعلم المستمر هو أفضل وسيلة للحماية</p>
+        </div>
+    </footer>
+
+    <script src="js/quiz.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,289 @@
+/* إعدادات عامة */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    direction: rtl;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* الرأس */
+header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem 0;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tagline {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    font-weight: 300;
+}
+
+/* المحتوى الرئيسي */
+main {
+    padding: 3rem 0;
+}
+
+/* السؤال الرئيسي */
+.main-question {
+    text-align: center;
+    margin-bottom: 4rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.question-text {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+}
+
+.emergency-section {
+    margin-top: 2rem;
+}
+
+.emergency-note {
+    margin-top: 1rem;
+    color: #e74c3c;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+/* قسم المساعدة النفسية */
+.support-section {
+    text-align: center;
+    margin-bottom: 4rem;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2.5rem 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.section-note {
+    margin-top: 1rem;
+    color: #7f8c8d;
+    font-size: 1rem;
+}
+
+/* قسم التثقيف */
+.education-section {
+    margin-bottom: 3rem;
+}
+
+.buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.button-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.button-description {
+    margin-top: 1rem;
+    color: #7f8c8d;
+    font-size: 1rem;
+}
+
+/* الأزرار */
+.btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* أزرار الطوارئ */
+.btn-emergency {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+    font-size: 1.4rem;
+    padding: 1.2rem 2.5rem;
+    animation: pulse 2s infinite;
+}
+
+.btn-emergency:hover {
+    background: linear-gradient(45deg, #c0392b, #a93226);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+/* أزرار الدعم */
+.btn-support {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-support:hover {
+    background: linear-gradient(45deg, #2980b9, #21618c);
+}
+
+/* أزرار الاختبار */
+.btn-quiz {
+    background: linear-gradient(45deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.btn-quiz:hover {
+    background: linear-gradient(45deg, #e67e22, #d35400);
+}
+
+/* أزرار التثقيف */
+.btn-education {
+    background: linear-gradient(45deg, #27ae60, #229954);
+    color: white;
+}
+
+.btn-education:hover {
+    background: linear-gradient(45deg, #229954, #1e8449);
+}
+
+/* التذييل */
+footer {
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    backdrop-filter: blur(10px);
+}
+
+.footer-note {
+    margin-top: 0.5rem;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* التصميم المتجاوب */
+@media (max-width: 768px) {
+    .logo {
+        font-size: 2rem;
+    }
+    
+    .question-text {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        font-size: 1rem;
+        padding: 0.8rem 1.5rem;
+        min-width: 150px;
+    }
+    
+    .btn-emergency {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+    }
+    
+    .buttons-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .main-question,
+    .support-section,
+    .button-card {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .logo {
+        font-size: 1.8rem;
+    }
+    
+    .question-text {
+        font-size: 1.5rem;
+    }
+    
+    .main-question,
+    .support-section,
+    .button-card {
+        padding: 1.5rem 1rem;
+    }
+}
+

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المرشد النفسي الافتراضي - مكافحة التحرش الإلكتروني</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 class="logo">💬 المرشد النفسي الافتراضي</h1>
+            <p class="tagline">مساحة آمنة للحديث والدعم النفسي</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- تحذير مهم -->
+            <section class="disclaimer-section">
+                <div class="disclaimer-box">
+                    <h2>⚠️ تنبيه مهم</h2>
+                    <p>هذا المرشد الافتراضي يقدم الدعم الأولي والإرشاد العام. في الحالات الطارئة أو الخطيرة، يُرجى التواصل مع مختص نفسي مؤهل أو الاتصال بأرقام الطوارئ.</p>
+                </div>
+            </section>
+
+            <!-- منطقة الدردشة -->
+            <section class="chat-section">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="bot-info">
+                            <div class="bot-avatar">🤖</div>
+                            <div class="bot-details">
+                                <h3>المرشد النفسي الافتراضي</h3>
+                                <span class="status online">متاح الآن</span>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button id="clearChat" class="action-btn" title="مسح المحادثة">🗑️</button>
+                            <button id="saveChat" class="action-btn" title="حفظ المحادثة">💾</button>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                <p>مرحباً بك! أنا هنا لمساعدتك ودعمك. يمكنك التحدث معي بحرية تامة حول أي مشكلة تواجهها. كل ما تشاركه معي سيبقى سرياً.</p>
+                                <p>كيف يمكنني مساعدتك اليوم؟</p>
+                            </div>
+                            <div class="message-time">الآن</div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-section">
+                        <div class="quick-responses">
+                            <button class="quick-btn" onclick="sendQuickMessage('أتعرض لتحرش إلكتروني ولا أعرف ماذا أفعل')">أتعرض لتحرش إلكتروني</button>
+                            <button class="quick-btn" onclick="sendQuickMessage('أشعر بالخوف والقلق من استخدام الإنترنت')">أشعر بالخوف والقلق</button>
+                            <button class="quick-btn" onclick="sendQuickMessage('كيف يمكنني حماية نفسي من التحرش الإلكتروني؟')">كيف أحمي نفسي؟</button>
+                        </div>
+                        
+                        <div class="input-container">
+                            <textarea 
+                                id="messageInput" 
+                                placeholder="اكتب رسالتك هنا..." 
+                                rows="1"
+                                maxlength="1000"
+                            ></textarea>
+                            <button id="sendButton" class="send-btn" disabled>
+                                <span class="send-icon">📤</span>
+                            </button>
+                        </div>
+                        
+                        <div class="input-info">
+                            <span id="charCount">0/1000</span>
+                            <span class="typing-indicator" id="typingIndicator" style="display: none;">المرشد يكتب...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- معلومات إضافية -->
+            <section class="info-section">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">🔒</div>
+                        <h3>سرية تامة</h3>
+                        <p>جميع المحادثات محمية ولا يتم حفظها أو مشاركتها</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">⏰</div>
+                        <h3>متاح 24/7</h3>
+                        <p>يمكنك التحدث معي في أي وقت من اليوم</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">🎯</div>
+                        <h3>دعم متخصص</h3>
+                        <p>مدرب خصيصاً لمساعدة ضحايا التحرش الإلكتروني</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">🤝</div>
+                        <h3>بيئة آمنة</h3>
+                        <p>مساحة خالية من الأحكام للتعبير عن مشاعرك</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- أزرار التنقل -->
+            <section class="navigation-section">
+                <div class="nav-buttons">
+                    <button class="nav-btn emergency-btn" onclick="window.location.href='emergency.html'">
+                        🚨 أحتاج مساعدة فورية
+                    </button>
+                    <button class="nav-btn back-btn" onclick="window.location.href='index.html'">
+                        ← العودة للصفحة الرئيسية
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 مكافحة التحرش الإلكتروني. جميع الحقوق محفوظة.</p>
+            <p class="footer-note">تذكر: أنت لست وحدك، والمساعدة متاحة دائماً</p>
+        </div>
+    </footer>
+
+    <!-- نافذة تأكيد مسح المحادثة -->
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>تأكيد مسح المحادثة</h3>
+            <p>هل أنت متأكد من أنك تريد مسح جميع الرسائل؟</p>
+            <div class="modal-buttons">
+                <button id="confirmClear" class="btn btn-danger">نعم، امسح</button>
+                <button id="cancelClear" class="btn btn-secondary">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
+
