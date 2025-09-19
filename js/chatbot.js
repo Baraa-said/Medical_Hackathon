@@ -84,8 +84,8 @@ async function sendMessage() {
     showTypingIndicator();
 
     try {
-        // إرسال الرسالة إلى ChatGPT
-        const response = await sendToChatGPT(message);
+        // MODIFIED: إرسال الرسالة إلى a new function that calls the Gemini API
+        const response = await sendToAIModel(message);
         
         // إخفاء مؤشر الكتابة
         hideTypingIndicator();
@@ -143,9 +143,8 @@ function addMessage(content, sender) {
     saveChatToStorage();
 }
 
-// إرسال إلى ChatGPT API
-async function sendToChatGPT(message) {
-    // إعداد السياق للمرشد النفسي
+// NEW: Replaced the 'sendToChatGPT' function with this new function for Gemini
+async function sendToAIModel(message) {
     const systemPrompt = `أنت مرشد نفسي افتراضي متخصص في مساعدة ضحايا التحرش الإلكتروني. 
     مهمتك هي:
     1. تقديم الدعم النفسي والعاطفي
@@ -155,26 +154,37 @@ async function sendToChatGPT(message) {
     5. عدم تقديم نصائح طبية أو قانونية متخصصة
     
     تحدث بطريقة دافئة ومتفهمة وداعمة. استخدم اللغة العربية بشكل طبيعي ومريح.`;
+    
+    const API_KEY = "AIzaSyCtM2eEQQFdNxojfoBHDf4TTlgovfpkwXU"; // 🔑 From your newcode.js
+    const MODEL = "gemini-1.5-flash";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+    // Convert chat history to Gemini's format
+    const contents = chatHistory.slice(-10).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model', // Note: 'assistant' role is 'model' for Gemini
+        parts: [{ text: msg.content }]
+    }));
+    // Add the current user message
+    contents.push({
+        role: 'user',
+        parts: [{ text: message }]
+    });
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getOpenAIKey()}`
             },
             body: JSON.stringify({
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    ...chatHistory.slice(-10).map(msg => ({
-                        role: msg.sender === 'user' ? 'user' : 'assistant',
-                        content: msg.content
-                    })),
-                    { role: 'user', content: message }
-                ],
-                max_tokens: 500,
-                temperature: 0.7
+                contents: contents,
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 500
+                }
             })
         });
 
@@ -183,22 +193,22 @@ async function sendToChatGPT(message) {
         }
 
         const data = await response.json();
-        return data.choices[0].message.content;
+        
+        // Parse Gemini's response structure safely
+        const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!botReply) {
+            throw new Error('Could not find a valid reply in the API response.');
+        }
+
+        return botReply;
 
     } catch (error) {
         console.error('خطأ في API:', error);
-        
-        // رد افتراضي في حالة فشل API
-        return getDefaultResponse(message);
+        return getDefaultResponse(message); // Fallback to default response on failure
     }
 }
 
-// الحصول على مفتاح OpenAI
-function getOpenAIKey() {
-    // في التطبيق الحقيقي، يجب أن يكون هذا في متغير بيئة آمن
-    // هنا نستخدم متغير البيئة المتاح في النظام
-    return process?.env?.OPENAI_API_KEY || 'your-openai-api-key-here';
-}
 
 // ردود افتراضية في حالة فشل API
 function getDefaultResponse(message) {
@@ -259,7 +269,9 @@ function clearChatHistory() {
     // الاحتفاظ بالرسالة الترحيبية فقط
     const welcomeMessage = messagesContainer.querySelector('.bot-message');
     messagesContainer.innerHTML = '';
-    messagesContainer.appendChild(welcomeMessage);
+    if (welcomeMessage) {
+        messagesContainer.appendChild(welcomeMessage);
+    }
     
     // مسح التاريخ
     chatHistory = [];
@@ -310,8 +322,7 @@ function loadChatHistory() {
         const saved = localStorage.getItem('chatHistory');
         if (saved) {
             chatHistory = JSON.parse(saved);
-            
-            // إعادة بناء المحادثة (اختياري - يمكن تعطيله لبدء محادثة جديدة)
+            // You can uncomment the line below if you want to show the old chat on page load
             // rebuildChatFromHistory();
         }
     } catch (error) {
@@ -412,4 +423,3 @@ window.addEventListener('unhandledrejection', function(e) {
     console.error('خطأ في الوعد:', e.reason);
     showNotification('حدث خطأ في الاتصال', 'error');
 });
-
