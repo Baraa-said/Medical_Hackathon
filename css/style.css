@@ -24,23 +24,58 @@ body {
 header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    padding: 2rem 0;
-    text-align: center;
+    padding: 1.5rem 0; /* تقليل الpadding قليلاً */
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: sticky; /* جعل الرأس ثابتًا عند التمرير */
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex; /* استخدام Flexbox لترتيب العناصر */
+    justify-content: space-between; /* توزيع العناصر على الجانبين */
+    align-items: center; /* محاذاة العناصر عموديًا */
+}
+
+.logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .logo {
-    font-size: 2.5rem;
+    font-size: 2rem; /* تقليل حجم الخط قليلاً */
     font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tagline {
-    font-size: 1.2rem;
+    font-size: 1rem; /* تقليل حجم الخط قليلاً */
     color: #7f8c8d;
     font-weight: 300;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px; /* المسافة بين عناصر القائمة */
+}
+
+nav a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    background-color: #f0f0f0;
+    color: #3498db;
 }
 
 /* المحتوى الرئيسي */
@@ -232,6 +267,17 @@ footer {
 
 /* التصميم المتجاوب */
 @media (max-width: 768px) {
+    .header-content {
+        flex-direction: column; /* جعل العناصر تتكدس عموديًا */
+        text-align: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 1rem;
+    }
+
     .logo {
         font-size: 2rem;
     }
@@ -286,4 +332,3 @@ footer {
         padding: 1.5rem 1rem;
     }
 }
-
