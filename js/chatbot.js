@@ -155,7 +155,7 @@ async function sendToAIModel(message) {
     
     تحدث بطريقة دافئة ومتفهمة وداعمة. استخدم اللغة العربية بشكل طبيعي ومريح.`;
     
-    const API_KEY = "AIzaSyCtM2eEQQFdNxojfoBHDf4TTlgovfpkwXU"; // 🔑 From your newcode.js
+    const API_KEY = "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY"; // 🔑 From your newcode.js
     const MODEL = "gemini-1.5-flash";
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
