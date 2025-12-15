@@ -1,10 +1,17 @@
+/* ================= IMPORT ================= */
+
+// ❗ هذه الصيغة الجديدة الرسمية
+import { GoogleGenAI } from "https://esm.run/@google/genai";
+
 /* ================= CONFIG ================= */
 
 // 🔴 ضع API KEY هنا
-const GEMINI_API_KEY = "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY";
+const ai = new GoogleGenAI({
+    apiKey: "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY"
+});
 
-// اختر الموديل
-const GEMINI_MODEL = "gemini-1.5-flash";
+// الموديل
+const MODEL_NAME = "gemini-3-pro-preview";
 
 let isTyping = false;
 
@@ -24,6 +31,9 @@ function setupUI() {
     input.addEventListener("input", () => {
         counter.textContent = `${input.value.length}/1000`;
         sendBtn.disabled = !input.value.trim() || isTyping;
+
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 120) + "px";
     });
 
     input.addEventListener("keydown", e => {
@@ -33,7 +43,7 @@ function setupUI() {
         }
     });
 
-    sendBtn.onclick = sendMessage;
+    sendBtn.addEventListener("click", sendMessage);
 }
 
 /* ================= CHAT ================= */
@@ -45,16 +55,21 @@ async function sendMessage() {
 
     addMessage(message, "user");
     input.value = "";
+    document.getElementById("charCount").textContent = "0/1000";
+
     showTyping();
 
     try {
-        const reply = await sendGeminiRequest(message);
+        const reply = await sendToGemini(message);
         hideTyping();
         addMessage(reply, "bot");
     } catch (err) {
         hideTyping();
-        addMessage("حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.", "bot");
         console.error(err);
+        addMessage(
+            "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.",
+            "bot"
+        );
     }
 }
 
@@ -73,47 +88,20 @@ function addMessage(text, role) {
     box.scrollTop = box.scrollHeight;
 }
 
-/* ================= GEMINI REQUEST ================= */
+/* ================= GEMINI (NEW SDK) ================= */
 
-async function sendGeminiRequest(userMessage) {
-    // 🔴 هذا هو الريكويست اللي طلبته
-    const url =
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-
-    const payload = {
+async function sendToGemini(userMessage) {
+    const response = await ai.models.generateContent({
+        model: MODEL_NAME,
         contents: [
             {
                 role: "user",
                 parts: [{ text: userMessage }]
             }
-        ],
-        generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500
-        }
-    };
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+        ]
     });
 
-    // 🔴 معالجة الأخطاء
-    if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Gemini Error ${response.status}: ${errText}`);
-    }
-
-    const data = await response.json();
-
-    // استخراج الرد
-    return (
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "لم يتم استلام رد من النموذج."
-    );
+    return response.text || "لم يتم استلام رد من النموذج.";
 }
 
 /* ================= TYPING ================= */
@@ -130,7 +118,7 @@ function hideTyping() {
     document.getElementById("sendButton").disabled = false;
 }
 
-/* ================= QUICK BUTTON ================= */
+/* ================= QUICK BUTTONS ================= */
 
 window.sendQuickMessage = function (msg) {
     const input = document.getElementById("messageInput");
