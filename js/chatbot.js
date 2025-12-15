@@ -1,28 +1,29 @@
-/* ================= GLOBAL STATE ================= */
+/* ================= CONFIG ================= */
 
-let chatHistory = [];
+// 🔴 ضع API KEY هنا
+const GEMINI_API_KEY = "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY";
+
+// اختر الموديل
+const GEMINI_MODEL = "gemini-1.5-flash";
+
 let isTyping = false;
 
 /* ================= INIT ================= */
 
 document.addEventListener("DOMContentLoaded", () => {
     setupUI();
-    setupEvents();
 });
 
-/* ================= UI SETUP ================= */
+/* ================= UI ================= */
 
 function setupUI() {
     const input = document.getElementById("messageInput");
-    const counter = document.getElementById("charCount");
     const sendBtn = document.getElementById("sendButton");
+    const counter = document.getElementById("charCount");
 
     input.addEventListener("input", () => {
         counter.textContent = `${input.value.length}/1000`;
         sendBtn.disabled = !input.value.trim() || isTyping;
-
-        input.style.height = "auto";
-        input.style.height = Math.min(input.scrollHeight, 120) + "px";
     });
 
     input.addEventListener("keydown", e => {
@@ -31,108 +32,91 @@ function setupUI() {
             if (!sendBtn.disabled) sendMessage();
         }
     });
+
+    sendBtn.onclick = sendMessage;
 }
 
-function setupEvents() {
-    document.getElementById("sendButton").addEventListener("click", sendMessage);
-}
+/* ================= CHAT ================= */
 
-/* ================= CHAT CORE ================= */
-
-function sendMessage() {
+async function sendMessage() {
     const input = document.getElementById("messageInput");
     const message = input.value.trim();
-
     if (!message || isTyping) return;
 
     addMessage(message, "user");
     input.value = "";
-    document.getElementById("charCount").textContent = "0/1000";
-
     showTyping();
 
-    setTimeout(() => {
-        const reply = getSmartResponse(message);
+    try {
+        const reply = await sendGeminiRequest(message);
         hideTyping();
         addMessage(reply, "bot");
-    }, 800);
+    } catch (err) {
+        hideTyping();
+        addMessage("حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.", "bot");
+        console.error(err);
+    }
 }
 
 function addMessage(text, role) {
-    const container = document.getElementById("chatMessages");
-    const msgDiv = document.createElement("div");
+    const box = document.getElementById("chatMessages");
+    const div = document.createElement("div");
 
-    msgDiv.className = `message ${role}-message`;
-
-    msgDiv.innerHTML = `
+    div.className = `message ${role}-message`;
+    div.innerHTML = `
         <div class="message-avatar">${role === "bot" ? "🤖" : "👤"}</div>
-        <div class="message-content">
-            <p>${text}</p>
-        </div>
+        <div class="message-content"><p>${text}</p></div>
         <div class="message-time">الآن</div>
     `;
 
-    container.appendChild(msgDiv);
-    container.scrollTop = container.scrollHeight;
-
-    chatHistory.push({ role, text });
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
 }
 
-/* ================= SMART RESPONSES ================= */
+/* ================= GEMINI REQUEST ================= */
 
-function getSmartResponse(message) {
-    const msg = message.toLowerCase();
+async function sendGeminiRequest(userMessage) {
+    // 🔴 هذا هو الريكويست اللي طلبته
+    const url =
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-    if (msg.includes("تحرش") || msg.includes("ابتزاز")) {
-        return `أنا آسف جدًا إنك تمر بهيك تجربة 💙  
-حابب أأكد لك إن اللي بصير معك **مش غلطك أبدًا**.
+    const payload = {
+        contents: [
+            {
+                role: "user",
+                parts: [{ text: userMessage }]
+            }
+        ],
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 500
+        }
+    };
 
-نصائح مهمة:
-• لا ترد على المتحرش  
-• احتفظ بالأدلة (Screenshots)  
-• اعمل حظر وإبلاغ فورًا  
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
 
-إذا بتحب، نقدر نحكي عن خطوات عملية تناسب وضعك.`;
+    // 🔴 معالجة الأخطاء
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini Error ${response.status}: ${errText}`);
     }
 
-    if (msg.includes("خوف") || msg.includes("قلق")) {
-        return `مشاعرك مفهومة وطبيعية جدًا 🌿  
-التجربة اللي مريت فيها صعبة، والخوف رد فعل إنساني.
+    const data = await response.json();
 
-خلينا نهدأ شوي:
-• خذ نفس عميق  
-• ذكر نفسك إنك بأمان الآن  
-
-تحب أحكي لك تمرين بسيط يخفف القلق؟`;
-    }
-
-    if (msg.includes("كيف") || msg.includes("أحمي")) {
-        return `لحماية نفسك من التحرش الإلكتروني:
-1️⃣ خلي حساباتك خاصة  
-2️⃣ لا تشارك معلومات شخصية  
-3️⃣ استخدم الحظر فورًا  
-4️⃣ اطلب مساعدة شخص موثوق  
-
-إذا بتحب، احكي لي على أي منصة بصير معك الموضوع.`;
-    }
-
-    if (msg.includes("مساعدة") || msg.includes("طوارئ")) {
-        return `إذا بتحس بخطر حقيقي أو تهديد مباشر 🚨  
-من المهم تتواصل فورًا مع:
-• شخص بالغ تثق به  
-• جهة مختصة في بلدك  
-
-طلب المساعدة قوة، مش ضعف 🤍`;
-    }
-
-    return `شكرًا إنك شاركتني 🤍  
-أنا موجود أسمعك بدون أي حكم.
-
-احكي لي أكثر:
-شو أكتر إشي مضايقك هالفترة؟`;
+    // استخراج الرد
+    return (
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "لم يتم استلام رد من النموذج."
+    );
 }
 
-/* ================= TYPING INDICATOR ================= */
+/* ================= TYPING ================= */
 
 function showTyping() {
     isTyping = true;
@@ -146,11 +130,11 @@ function hideTyping() {
     document.getElementById("sendButton").disabled = false;
 }
 
-/* ================= QUICK BUTTONS ================= */
+/* ================= QUICK BUTTON ================= */
 
-window.sendQuickMessage = function(message) {
+window.sendQuickMessage = function (msg) {
     const input = document.getElementById("messageInput");
-    input.value = message;
+    input.value = msg;
     input.dispatchEvent(new Event("input"));
     sendMessage();
 };
