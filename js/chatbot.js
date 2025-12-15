@@ -1,3 +1,10 @@
+// 1. IMPORT THE SDK (Must be at the very top)
+import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+// 2. CONFIGURATION
+const API_KEY = "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY"; // ⚠️ Note: Exposing keys in client-side code is risky for production apps.
+const genAI = new GoogleGenerativeAI(API_KEY);
+
 // متغيرات عامة
 let chatHistory = [];
 let isTyping = false;
@@ -39,7 +46,6 @@ function initializeChatbot() {
         }
     });
 
-    // تركيز على حقل الإدخال
     messageInput.focus();
 }
 
@@ -52,18 +58,20 @@ function setupEventListeners() {
     const confirmClear = document.getElementById('confirmClear');
     const cancelClear = document.getElementById('cancelClear');
 
-    sendButton.addEventListener('click', sendMessage);
-    clearChat.addEventListener('click', showClearConfirmation);
-    saveChat.addEventListener('click', saveChatHistory);
-    confirmClear.addEventListener('click', clearChatHistory);
-    cancelClear.addEventListener('click', hideClearConfirmation);
+    // Note: We check if elements exist to prevent errors if HTML is missing IDs
+    if(sendButton) sendButton.addEventListener('click', sendMessage);
+    if(clearChat) clearChat.addEventListener('click', showClearConfirmation);
+    if(saveChat) saveChat.addEventListener('click', saveChatHistory);
+    if(confirmClear) confirmClear.addEventListener('click', clearChatHistory);
+    if(cancelClear) cancelClear.addEventListener('click', hideClearConfirmation);
 
-    // إغلاق النافذة المنبثقة عند الضغط خارجها
-    confirmModal.addEventListener('click', function(e) {
-        if (e.target === confirmModal) {
-            hideClearConfirmation();
-        }
-    });
+    if(confirmModal) {
+        confirmModal.addEventListener('click', function(e) {
+            if (e.target === confirmModal) {
+                hideClearConfirmation();
+            }
+        });
+    }
 }
 
 // إرسال رسالة
@@ -84,7 +92,7 @@ async function sendMessage() {
     showTypingIndicator();
 
     try {
-        // MODIFIED: إرسال الرسالة إلى a new function that calls the Gemini API
+        // إرسال الرسالة باستخدام SDK
         const response = await sendToAIModel(message);
         
         // إخفاء مؤشر الكتابة
@@ -98,14 +106,6 @@ async function sendMessage() {
         hideTypingIndicator();
         addMessage('عذراً، حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.', 'bot');
     }
-}
-
-// إرسال رسالة سريعة
-function sendQuickMessage(message) {
-    const messageInput = document.getElementById('messageInput');
-    messageInput.value = message;
-    messageInput.dispatchEvent(new Event('input'));
-    sendMessage();
 }
 
 // إضافة رسالة إلى المحادثة
@@ -139,11 +139,12 @@ function addMessage(content, sender) {
         timestamp: new Date().toISOString()
     });
 
-    // حفظ في التخزين المحلي
     saveChatToStorage();
 }
 
-// NEW: Replaced the 'sendToChatGPT' function with this new function for Gemini
+// ---------------------------------------------------------
+// NEW: UPDATED FUNCTION USING GOOGLE GENERATIVE AI SDK
+// ---------------------------------------------------------
 async function sendToAIModel(message) {
     const systemPrompt = `أنت مرشد نفسي افتراضي متخصص في مساعدة ضحايا التحرش الإلكتروني. 
     مهمتك هي:
@@ -155,60 +156,43 @@ async function sendToAIModel(message) {
     
     تحدث بطريقة دافئة ومتفهمة وداعمة. استخدم اللغة العربية بشكل طبيعي ومريح.`;
     
-    const API_KEY = "AIzaSyC4VQ_UxOQj4QBnhDCv1PRsHWTgHUVFZZY"; // 🔑 From your newcode.js
-    const MODEL = "gemini-1.5-flash";
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-
-    // Convert chat history to Gemini's format
-    const contents = chatHistory.slice(-10).map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'model', // Note: 'assistant' role is 'model' for Gemini
-        parts: [{ text: msg.content }]
-    }));
-    // Add the current user message
-    contents.push({
-        role: 'user',
-        parts: [{ text: message }]
-    });
-
     try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: contents,
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 500
-                }
-            })
+        // 1. Initialize Model with System Instruction
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: systemPrompt
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // 2. Convert existing chatHistory to Gemini SDK format
+        // Gemini SDK expects format: { role: "user" | "model", parts: [{ text: "..." }] }
+        // We exclude the very last message added to UI (current message) because sendMessage sends it separately
+        const sdkHistory = chatHistory
+            .slice(0, -1) // Exclude the message we just added in sendMessage()
+            .map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.content }]
+            }));
 
-        const data = await response.json();
-        
-        // Parse Gemini's response structure safely
-        const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        // 3. Start Chat Session
+        const chat = model.startChat({
+            history: sdkHistory,
+            generationConfig: {
+                maxOutputTokens: 500,
+                temperature: 0.7,
+            }
+        });
 
-        if (!botReply) {
-            throw new Error('Could not find a valid reply in the API response.');
-        }
+        // 4. Send Message
+        const result = await chat.sendMessage(message);
+        const responseText = result.response.text();
 
-        return botReply;
+        return responseText;
 
     } catch (error) {
-        console.error('خطأ في API:', error);
-        return getDefaultResponse(message); // Fallback to default response on failure
+        console.error('Gemini SDK Error:', error);
+        return getDefaultResponse(message); // Fallback
     }
 }
-
 
 // ردود افتراضية في حالة فشل API
 function getDefaultResponse(message) {
@@ -218,76 +202,64 @@ function getDefaultResponse(message) {
         'مساعدة': 'أنا هنا لمساعدتك. يمكنني تقديم الدعم النفسي والنصائح العملية. إذا كنت في خطر فوري، أنصحك بالاتصال بأرقام الطوارئ. وإذا كنت تحتاج لمساعدة متخصصة، يمكنني توجيهك للمراكز المناسبة. ما الذي تحتاج للحديث عنه؟'
     };
 
-    // البحث عن كلمات مفتاحية
     for (const [keyword, response] of Object.entries(responses)) {
         if (message.includes(keyword)) {
             return response;
         }
     }
 
-    // رد عام
     return 'شكراً لك على مشاركة هذا معي. أنا هنا للاستماع ومساعدتك. يمكنك التحدث معي بحرية تامة عن أي شيء يقلقك. كيف يمكنني دعمك بشكل أفضل؟';
 }
 
-// إظهار مؤشر الكتابة
+// --- Helper Functions (No changes needed below here usually) ---
+
 function showTypingIndicator() {
     isTyping = true;
     const typingIndicator = document.getElementById('typingIndicator');
     const sendButton = document.getElementById('sendButton');
     
-    typingIndicator.style.display = 'block';
-    sendButton.disabled = true;
+    if(typingIndicator) typingIndicator.style.display = 'block';
+    if(sendButton) sendButton.disabled = true;
 }
 
-// إخفاء مؤشر الكتابة
 function hideTypingIndicator() {
     isTyping = false;
     const typingIndicator = document.getElementById('typingIndicator');
     const sendButton = document.getElementById('sendButton');
     const messageInput = document.getElementById('messageInput');
     
-    typingIndicator.style.display = 'none';
-    sendButton.disabled = messageInput.value.trim() === '';
+    if(typingIndicator) typingIndicator.style.display = 'none';
+    if(sendButton && messageInput) sendButton.disabled = messageInput.value.trim() === '';
 }
 
-// إظهار تأكيد مسح المحادثة
 function showClearConfirmation() {
     const modal = document.getElementById('confirmModal');
-    modal.style.display = 'flex';
+    if(modal) modal.style.display = 'flex';
 }
 
-// إخفاء تأكيد مسح المحادثة
 function hideClearConfirmation() {
     const modal = document.getElementById('confirmModal');
-    modal.style.display = 'none';
+    if(modal) modal.style.display = 'none';
 }
 
-// مسح المحادثة
 function clearChatHistory() {
     const messagesContainer = document.getElementById('chatMessages');
-    
-    // الاحتفاظ بالرسالة الترحيبية فقط
     const welcomeMessage = messagesContainer.querySelector('.bot-message');
     messagesContainer.innerHTML = '';
     if (welcomeMessage) {
         messagesContainer.appendChild(welcomeMessage);
     }
-    
-    // مسح التاريخ
     chatHistory = [];
     localStorage.removeItem('chatHistory');
-    
     hideClearConfirmation();
     showNotification('تم مسح المحادثة بنجاح', 'success');
 }
 
-// حفظ المحادثة
 function saveChatHistory() {
     if (chatHistory.length === 0) {
         showNotification('لا توجد رسائل لحفظها', 'warning');
         return;
     }
-
     const chatText = chatHistory.map(msg => {
         const sender = msg.sender === 'user' ? 'أنت' : 'المرشد';
         const time = new Date(msg.timestamp).toLocaleString('ar-SA');
@@ -303,11 +275,9 @@ function saveChatHistory() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-
     showNotification('تم حفظ المحادثة بنجاح', 'success');
 }
 
-// حفظ المحادثة في التخزين المحلي
 function saveChatToStorage() {
     try {
         localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
@@ -316,14 +286,11 @@ function saveChatToStorage() {
     }
 }
 
-// تحميل المحادثة من التخزين المحلي
 function loadChatHistory() {
     try {
         const saved = localStorage.getItem('chatHistory');
         if (saved) {
             chatHistory = JSON.parse(saved);
-            // You can uncomment the line below if you want to show the old chat on page load
-            // rebuildChatFromHistory();
         }
     } catch (error) {
         console.error('خطأ في تحميل المحادثة:', error);
@@ -331,38 +298,6 @@ function loadChatHistory() {
     }
 }
 
-// إعادة بناء المحادثة من التاريخ
-function rebuildChatFromHistory() {
-    const messagesContainer = document.getElementById('chatMessages');
-    
-    chatHistory.forEach(msg => {
-        if (msg.sender !== 'bot' || msg.content !== 'مرحباً بك!') {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${msg.sender}-message`;
-            
-            const time = new Date(msg.timestamp).toLocaleTimeString('ar-SA', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            const avatar = msg.sender === 'bot' ? '🤖' : '👤';
-            
-            messageDiv.innerHTML = `
-                <div class="message-avatar">${avatar}</div>
-                <div class="message-content">
-                    <p>${msg.content}</p>
-                </div>
-                <div class="message-time">${time}</div>
-            `;
-
-            messagesContainer.appendChild(messageDiv);
-        }
-    });
-    
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-}
-
-// دالة عرض الإشعارات
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
@@ -412,14 +347,10 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
-// التعامل مع الأخطاء العامة
-window.addEventListener('error', function(e) {
-    console.error('خطأ في التطبيق:', e.error);
-    showNotification('حدث خطأ غير متوقع', 'error');
-});
-
-// التعامل مع الأخطاء غير المعالجة في الوعود
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('خطأ في الوعد:', e.reason);
-    showNotification('حدث خطأ في الاتصال', 'error');
-});
+// Global window accessible functions if needed by HTML onclick (though event listeners are preferred)
+window.sendQuickMessage = function(message) {
+    const messageInput = document.getElementById('messageInput');
+    messageInput.value = message;
+    messageInput.dispatchEvent(new Event('input'));
+    sendMessage();
+}
